@@ -60,8 +60,8 @@ The public defaults in `configs/paths.json` use:
 Override them with local Diffusers-format model directories:
 
 ```bash
-export ERASESAE_HUNYUAN_MODEL_PATH=/mnt/afs_wangxinghao/model/HunyuanVideo
-export ERASESAE_COGVIDEOX_MODEL_PATH=/mnt/afs_wangxinghao/model/CogVideoX-5b
+export ERASESAE_HUNYUAN_MODEL_PATH=/model/HunyuanVideo
+export ERASESAE_COGVIDEOX_MODEL_PATH=/model/CogVideoX-5b
 ```
 
 Alternatively, pass `--base-model-path` to a training or inference command.
