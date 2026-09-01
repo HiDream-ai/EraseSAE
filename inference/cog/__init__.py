@@ -1,0 +1,1 @@
+"""CogVideoX inference code."""

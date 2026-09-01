@@ -1,0 +1,13 @@
+accelerate
+diffusers
+imageio
+imageio-ffmpeg
+numpy
+pillow
+protobuf>=3.20.3
+sentencepiece
+torch
+tqdm
+transformers
+wandb
+

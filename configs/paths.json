@@ -1,0 +1,4 @@
+{
+  "hunyuan": "pretrained_models/HunyuanVideo",
+  "cogvideox_5b": "pretrained_models/CogVideoX-5b"
+}

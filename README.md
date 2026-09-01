@@ -1,37 +1,69 @@
+<div align="center">
+
 # EraseSAE
 
-Official PyTorch implementation of **EraseSAE**, a sparse-autoencoder method
-for concept erasure in text-to-video diffusion models. This release contains
-the code and prompts required to train and run EraseSAE on HunyuanVideo and
-CogVideoX-5B.
+### Sparse Autoencoder Based Concept Erasure for Text-to-Video Diffusion Models
 
-Training streams transformer activations online. It does not save activation
-dumps or require source videos when using the default prompt mode. Attribution
-and feature mining run automatically after SAE optimization and publish a
-validated checkpoint bundle for inference.
+Official PyTorch implementation for **ECCV 2026**
 
-Evaluation code, pretrained video-model weights, EraseSAE checkpoints, generated
-videos, and experiment logs are intentionally not included.
+<p>
+  <a href="https://huggingface.co/wxhustc/EraseSAE"><img src="https://img.shields.io/badge/Models-Hugging_Face-FFD21E?logo=huggingface&logoColor=black" alt="Hugging Face checkpoints"></a>
+  <a href="#citation"><img src="https://img.shields.io/badge/ECCV-2026-4C78A8" alt="ECCV 2026"></a>
+</p>
 
-## Repository Structure
+[Overview](#overview) | [Demo](#demo) | [Method](#method) | [Installation](#installation) | [Training](#training) | [Inference](#inference) | [Models](#models-and-checkpoints)
 
-```text
-EraseSAE/
-├── configs/                 # Training, attribution, and inference defaults
-├── data/
-│   ├── train/              # Prompts used by online SAE training
-│   └── inference_demo/     # Final Hunyuan/CogVideoX demo prompts
-├── model/                   # Partitioned SAE definitions and objectives
-├── training/                # Online training and attribution entry points
-├── inference/
-│   ├── hunyuan/             # HunyuanVideo inference
-│   └── cog/                 # CogVideoX inference
-├── checkpoints/             # Empty target directories for EraseSAE bundles
-├── pretrained_models/       # Optional local base-model directories
-├── MODEL_DOWNLOADS.md
-├── requirements.txt
-└── constraints-tested.txt
-```
+</div>
+
+## Overview
+
+**EraseSAE** performs localized concept erasure in text-to-video diffusion
+models by decomposing transformer activations with a partitioned convolutional
+sparse autoencoder. It attributes sparse kernels to a target concept and uses
+their spatial response to guide only the relevant latent regions during video
+generation.
+
+This release supports **celebrity identity erasure** and **nudity erasure** on
+[HunyuanVideo](https://huggingface.co/hunyuanvideo-community/HunyuanVideo) and
+[CogVideoX-5b](https://huggingface.co/zai-org/CogVideoX-5b).
+
+## Demo
+
+### Method Overview
+
+<p align="center">
+  <img src="demo/pipeline.png" width="100%" alt="EraseSAE pipeline: decompose, attribute, and erase">
+</p>
+
+<p align="center"><em>EraseSAE first decomposes transformer features, attributes sparse kernels to the target concept, and then applies spatially masked concept erasure during denoising.</em></p>
+
+### Qualitative Results
+
+<video src="demo/demo.mp4" controls muted playsinline width="100%"></video>
+
+<p align="center">
+  <strong><a href="demo/demo.mp4">Open the full qualitative comparison video</a></strong>
+  (MP4, 2 min 29 s)
+</p>
+
+> [!WARNING]
+> The qualitative video contains censored examples used to demonstrate
+> explicit-content erasure.
+
+## Method
+
+EraseSAE follows three stages:
+
+1. **Decompose.** A partitioned convolutional SAE decomposes an intermediate
+   diffusion-transformer feature map into context kernels and concept kernels.
+2. **Attribute.** Positive and negative prompt pairs identify stable sparse
+   kernels that respond selectively to each target concept.
+3. **Erase.** During denoising, attributed kernels produce a spatial mask and
+   masked CFG moves only the selected region toward a reference condition.
+
+Training streams short latent trajectories directly from the frozen base video
+model. No source-video dataset is required in the default prompt mode, and only
+compact normalization statistics and SAE checkpoints are written to disk.
 
 ## Installation
 
@@ -70,7 +102,17 @@ The empty `pretrained_models/HunyuanVideo/` and
 names; model weights are not included.
 See `pretrained_models/README.md` for complete download commands.
 
-Place downloaded EraseSAE bundles under:
+Download all released SAE checkpoints from
+[wxhustc/EraseSAE](https://huggingface.co/wxhustc/EraseSAE). Run this command
+from the EraseSAE repository root:
+
+```bash
+hf download wxhustc/EraseSAE \
+  --include "checkpoints/**" \
+  --local-dir .
+```
+
+This preserves the checkpoint hierarchy expected by the inference commands:
 
 ```text
 checkpoints/
@@ -82,26 +124,10 @@ checkpoints/
     └── nudity/
 ```
 
-Each inference-ready run contains a SAE weight, normalization statistics,
-attribution map, checkpoint pointer, and validated `bundle_*.json` manifest.
-See `MODEL_DOWNLOADS.md` for the exact filenames.
+See `MODEL_DOWNLOADS.md` for selective download commands and the exact files
+used by each inference backend.
 
 ## Training
-
-The four release training entry points are:
-
-```text
-training/hunyuan_celebs.py
-training/hunyuan_nudity.py
-training/cog_celebs.py
-training/cog_nudity.py
-```
-
-All four use online prompt-mode activation streaming by default. For each
-batch, the base model generates the configured short denoising trajectory, the
-target-layer activation and target-token mask are captured, the SAE is updated,
-and the activation batch is released. A compact mean/std file is cached, but no
-activation tensors are written to disk.
 
 ### Single GPU
 
@@ -229,6 +255,8 @@ CUDA_VISIBLE_DEVICES=0 PYTHONPATH=. python inference/cog/inference_partitioned.p
   --checkpoint-dir checkpoints/cog/celebrity \
   --output-dir outputs/inference/cog/celebrity/swift \
   --reference-prompt nudity \
+  --concept-gate-mode competition --concept-gate-policy per_step \
+  --competition-ratio 0.95 --min-relative-score 0.05 \
   --generate-originals --save-diagnostics --save-step-masks
 ```
 
@@ -243,11 +271,23 @@ CUDA_VISIBLE_DEVICES=0 PYTHONPATH=. python inference/cog/inference_partitioned.p
   --checkpoint-dir checkpoints/cog/nudity \
   --output-dir outputs/inference/cog/nudity/single \
   --reference-prompt nudity \
+  --concept-gate-mode competition --concept-gate-policy per_step \
+  --competition-ratio 1.05 --min-relative-score 0.05 \
   --generate-originals --save-diagnostics --save-step-masks
 ```
 
 CogVideoX dynamic CFG is enabled by default. Pass `--no-dynamic-cfg` only for a
-constant-CFG ablation.
+constant-CFG ablation. The documented CogVideoX commands match HunyuanVideo by
+using `competition` gating with `per_step` routing. At every denoising step, the
+calibrated target score must pass `--min-relative-score` and reach the configured
+fraction of the strongest competing partition. Cog celebrity uses
+`0.95`, allowing the target to trail the strongest competing identity by at most
+5% to absorb near-tie noise; Cog nudity keeps `1.05`, requiring nudity to lead
+`no_nudity` by 5%. A rejected step has an empty mask, but the decision is
+recomputed at the next step instead of being latched for the entire video. The
+optional `target` mode is less strict because it keeps only the minimum
+target-score check. Use `off` only when diagnosing spatial mask construction
+because it removes calibrated concept-score gating entirely.
 
 ### Batch Video Generation
 
@@ -269,11 +309,13 @@ GPU=0 MAX_PROMPTS=0 \
 
 ERASESAE_COGVIDEOX_MODEL_PATH=pretrained_models/CogVideoX-5b \
 CHECKPOINT_DIR=checkpoints/cog/celebrity \
+CONCEPT_GATE_MODE=competition CONCEPT_GATE_POLICY=per_step \
 GPU=0 MAX_PROMPTS=0 \
   bash inference/cog/run_celebrity_validation.sh
 
 ERASESAE_COGVIDEOX_MODEL_PATH=pretrained_models/CogVideoX-5b \
 CHECKPOINT_DIR=checkpoints/cog/nudity \
+CONCEPT_GATE_MODE=competition CONCEPT_GATE_POLICY=per_step \
 GPU=0 MAX_PROMPTS=0 \
   bash inference/cog/run_nudity_validation.sh
 ```
@@ -288,5 +330,14 @@ Inference writes MP4 files, step-mask PNGs, and optional diagnostics JSON under
 
 ## Citation
 
-Please cite the EraseSAE paper. Add the final proceedings BibTeX entry here
-before publishing the repository.
+If you find this repository useful, please cite:
+
+```bibtex
+@inproceedings{wang2026erasesae,
+  title     = {{EraseSAE}: Surgical Concept Erasure in Text-to-Video Diffusion Models via Sparse Autoencoders},
+  author    = {Xinghao Wang and Author Two and Author Three},
+  booktitle = {European Conference on Computer Vision},
+  year      = {2026}
+}
+```
+
