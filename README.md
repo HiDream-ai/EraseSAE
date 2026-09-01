@@ -39,10 +39,16 @@ This release supports **celebrity identity erasure** and **nudity erasure** on
 
 ### Qualitative Results
 
-<video src="demo/demo.mp4" controls muted playsinline width="100%"></video>
+<p align="center">
+  <a href="demo/demo.mp4">
+    <img src="demo/demo_preview.gif" width="720" alt="Animated EraseSAE qualitative results">
+  </a>
+</p>
+
+<p align="center"><em>Animated preview covering nudity and celebrity erasure. Click the preview to access the full-resolution video.</em></p>
 
 <p align="center">
-  <strong><a href="demo/demo.mp4">Open the full qualitative comparison video</a></strong>
+  <strong><a href="demo/demo.mp4">Download the full qualitative comparison video</a></strong>
   (MP4, 2 min 29 s)
 </p>
 
@@ -340,4 +346,3 @@ If you find this repository useful, please cite:
   year      = {2026}
 }
 ```
-
