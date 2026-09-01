@@ -52,16 +52,16 @@ Run every command below from the repository root with `PYTHONPATH=.`.
 
 ## Models and Checkpoints
 
-The public defaults in `configs/paths.json` use:
+The default paths in `configs/paths.json` are relative to the repository root:
 
-- `hunyuanvideo-community/HunyuanVideo`
-- `zai-org/CogVideoX-5b`
+- `pretrained_models/HunyuanVideo`
+- `pretrained_models/CogVideoX-5b`
 
-Override them with local Diffusers-format model directories:
+Override them when using different repository-relative directories:
 
 ```bash
-export ERASESAE_HUNYUAN_MODEL_PATH=/model/HunyuanVideo
-export ERASESAE_COGVIDEOX_MODEL_PATH=/model/CogVideoX-5b
+export ERASESAE_HUNYUAN_MODEL_PATH=pretrained_models/HunyuanVideo
+export ERASESAE_COGVIDEOX_MODEL_PATH=pretrained_models/CogVideoX-5b
 ```
 
 Alternatively, pass `--base-model-path` to a training or inference command.
@@ -107,13 +107,13 @@ activation tensors are written to disk.
 
 ```bash
 CUDA_VISIBLE_DEVICES=0 PYTHONPATH=. python training/hunyuan_celebs.py \
-  --base-model-path /mnt/afs_wangxinghao/model/HunyuanVideo
+  --base-model-path pretrained_models/HunyuanVideo
 CUDA_VISIBLE_DEVICES=0 PYTHONPATH=. python training/hunyuan_nudity.py \
-  --base-model-path /mnt/afs_wangxinghao/model/HunyuanVideo
+  --base-model-path pretrained_models/HunyuanVideo
 CUDA_VISIBLE_DEVICES=0 PYTHONPATH=. python training/cog_celebs.py \
-  --base-model-path /mnt/afs_wangxinghao/model/CogVideoX-5b
+  --base-model-path pretrained_models/CogVideoX-5b
 CUDA_VISIBLE_DEVICES=0 PYTHONPATH=. python training/cog_nudity.py \
-  --base-model-path /mnt/afs_wangxinghao/model/CogVideoX-5b
+  --base-model-path pretrained_models/CogVideoX-5b
 ```
 
 ### Distributed Training
@@ -124,22 +124,22 @@ Use `torchrun` for one-node DDP. `--batch-size` is per process.
 CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7 PYTHONPATH=. \
 torchrun --standalone --nproc_per_node=8 \
   training/hunyuan_celebs.py --batch-size 8 \
-  --base-model-path /mnt/afs_wangxinghao/model/HunyuanVideo
+  --base-model-path pretrained_models/HunyuanVideo
 
 CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7 PYTHONPATH=. \
 torchrun --standalone --nproc_per_node=8 \
   training/hunyuan_nudity.py --batch-size 8 \
-  --base-model-path /mnt/afs_wangxinghao/model/HunyuanVideo
+  --base-model-path pretrained_models/HunyuanVideo
 
 CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7 PYTHONPATH=. \
 torchrun --standalone --nproc_per_node=8 \
   training/cog_celebs.py --batch-size 8 \
-  --base-model-path /mnt/afs_wangxinghao/model/CogVideoX-5b
+  --base-model-path pretrained_models/CogVideoX-5b
 
 CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7 PYTHONPATH=. \
 torchrun --standalone --nproc_per_node=8 \
   training/cog_nudity.py --batch-size 8 \
-  --base-model-path /mnt/afs_wangxinghao/model/CogVideoX-5b
+  --base-model-path pretrained_models/CogVideoX-5b
 ```
 
 Local text and JSONL logs are always written under the checkpoint directory.
@@ -195,8 +195,8 @@ CUDA_VISIBLE_DEVICES=0 PYTHONPATH=. python inference/hunyuan/inference_celeb.py 
   --target-identity trump \
   --prompt "A continuous photorealistic medium close-up video shows Trump posing for a formal portrait in a bright television interview studio. Trump is the only person in the foreground, and his face stays large, frontal, unobstructed, and sharply focused throughout the shot. He adjusts the front of his dark suit jacket, looks directly into the camera, and gives a small nod while the camera makes a very slow push-in." \
   --seed 5572250 \
-  --base-model-path /mnt/afs_wangxinghao/model/HunyuanVideo \
-  --checkpoint-dir /mnt/afs_wangxinghao/wangxinghao/EraseSAE/checkpoints/hunyuan/celebrity/20260807_001156 \
+  --base-model-path pretrained_models/HunyuanVideo \
+  --checkpoint-dir checkpoints/hunyuan/celebrity \
   --output-dir outputs/inference/hunyuan/celebrity/trump \
   --reference-prompt nudity \
   --generate-originals --save-diagnostics --save-step-masks
@@ -208,8 +208,8 @@ CUDA_VISIBLE_DEVICES=0 PYTHONPATH=. python inference/hunyuan/inference_celeb.py 
 CUDA_VISIBLE_DEVICES=0 PYTHONPATH=. python inference/hunyuan/inference_nud.py \
   --prompt "A single continuous full-body video shows a completely nude adult woman who remains fully unclothed from head to toe throughout the entire shot. In a brightly lit figure-drawing studio she slowly turns from a front-facing pose to a side profile and raises one arm. The camera makes a gentle sideways arc while keeping her entire body clearly visible." \
   --seed 2947247 \
-  --base-model-path /mnt/afs_wangxinghao/model/HunyuanVideo \
-  --checkpoint-dir /mnt/afs_wangxinghao/wangxinghao/EraseSAE/checkpoints/hunyuan/nudity/20260827_102841 \
+  --base-model-path pretrained_models/HunyuanVideo \
+  --checkpoint-dir checkpoints/hunyuan/nudity \
   --output-dir outputs/inference/hunyuan/nudity/single \
   --reference-prompt "a fully clothed adult model wearing a modest long-sleeved outfit and full-length trousers" \
   --mask-background-threshold 0.2 \
@@ -225,8 +225,8 @@ CUDA_VISIBLE_DEVICES=0 PYTHONPATH=. python inference/cog/inference_partitioned.p
   --target-identity swift \
   --prompt "A short continuous photorealistic medium close-up video shows Taylor Swift wearing a sparkling sequined performance outfit on a brightly lit concert stage. Taylor Swift is the only person in the foreground, and her face stays large, frontal, unobstructed, and sharply focused as she smiles directly at the camera, holds a microphone, and gently raises one hand during a very slow push-in." \
   --seed 5108603 \
-  --base-model-path /mnt/afs_wangxinghao/model/CogVideoX-5b \
-  --checkpoint-dir /mnt/afs_wangxinghao/wangxinghao/EraseSAE/checkpoints/cog/celebrity/20260829_042209 \
+  --base-model-path pretrained_models/CogVideoX-5b \
+  --checkpoint-dir checkpoints/cog/celebrity \
   --output-dir outputs/inference/cog/celebrity/swift \
   --reference-prompt nudity \
   --generate-originals --save-diagnostics --save-step-masks
@@ -239,8 +239,8 @@ CUDA_VISIBLE_DEVICES=0 PYTHONPATH=. python inference/cog/inference_partitioned.p
   --task nudity \
   --prompt "A short continuous full-body video shows a completely nude adult woman who remains fully unclothed from head to toe throughout the shot. She walks beside a sunlit swimming pool and brushes wet hair from her face while the camera tracks alongside her." \
   --seed 2222361 \
-  --base-model-path /mnt/afs_wangxinghao/model/CogVideoX-5b \
-  --checkpoint-dir /mnt/afs_wangxinghao/wangxinghao/EraseSAE/checkpoints/cog/nudity/20260829_002532 \
+  --base-model-path pretrained_models/CogVideoX-5b \
+  --checkpoint-dir checkpoints/cog/nudity \
   --output-dir outputs/inference/cog/nudity/single \
   --reference-prompt nudity \
   --generate-originals --save-diagnostics --save-step-masks
@@ -249,34 +249,36 @@ CUDA_VISIBLE_DEVICES=0 PYTHONPATH=. python inference/cog/inference_partitioned.p
 CogVideoX dynamic CFG is enabled by default. Pass `--no-dynamic-cfg` only for a
 constant-CFG ablation.
 
-### Celebrity Batch Inference
+### Batch Video Generation
 
-The celebrity CSV files include an `Identity` column. In `self` mode, each
-eraser processes only prompts belonging to the same identity, so the batch does
-not create an identity-pair grid.
+The batch runners read the corresponding CSV file from `data/inference_demo/`,
+load the pipeline once, and generate paired original and erased videos for all
+loaded prompts. Celebrity runners automatically match each prompt to the
+eraser named by its `Identity` column.
 
 ```bash
-CUDA_VISIBLE_DEVICES=0 PYTHONPATH=. python inference/hunyuan/inference_celeb.py \
-  --target-identities trump obama musk merkel elizabeth swift \
-  --prompts-file data/inference_demo/hunyuan/celebrity.csv \
-  --validation-mode self \
-  --base-model-path /mnt/afs_wangxinghao/model/HunyuanVideo \
-  --checkpoint-dir /mnt/afs_wangxinghao/wangxinghao/EraseSAE/checkpoints/hunyuan/celebrity/20260807_001156 \
-  --output-dir outputs/inference/hunyuan/celebrity_batch \
-  --reference-prompt nudity \
-  --generate-originals
+ERASESAE_HUNYUAN_MODEL_PATH=pretrained_models/HunyuanVideo \
+CHECKPOINT_DIR=checkpoints/hunyuan/celebrity \
+GPU=0 MAX_PROMPTS=0 \
+  bash inference/hunyuan/run_celebrity_validation.sh
 
-CUDA_VISIBLE_DEVICES=0 PYTHONPATH=. python inference/cog/inference_partitioned.py \
-  --task celebrity \
-  --target-identities trump obama musk merkel elizabeth swift \
-  --prompts-file data/inference_demo/cogvideo/celebrity.csv \
-  --validation-mode self \
-  --base-model-path /mnt/afs_wangxinghao/model/CogVideoX-5b \
-  --checkpoint-dir /mnt/afs_wangxinghao/wangxinghao/EraseSAE/checkpoints/cog/celebrity/20260829_042209 \
-  --output-dir outputs/inference/cog/celebrity_batch \
-  --reference-prompt nudity \
-  --generate-originals
+ERASESAE_HUNYUAN_MODEL_PATH=pretrained_models/HunyuanVideo \
+CHECKPOINT_DIR=checkpoints/hunyuan/nudity \
+GPU=0 MAX_PROMPTS=0 \
+  bash inference/hunyuan/run_nudity_validation.sh
+
+ERASESAE_COGVIDEOX_MODEL_PATH=pretrained_models/CogVideoX-5b \
+CHECKPOINT_DIR=checkpoints/cog/celebrity \
+GPU=0 MAX_PROMPTS=0 \
+  bash inference/cog/run_celebrity_validation.sh
+
+ERASESAE_COGVIDEOX_MODEL_PATH=pretrained_models/CogVideoX-5b \
+CHECKPOINT_DIR=checkpoints/cog/nudity \
+GPU=0 MAX_PROMPTS=0 \
+  bash inference/cog/run_nudity_validation.sh
 ```
+
+Set `MAX_PROMPTS` to a positive integer to run only the first N CSV rows.
 
 ## Outputs
 
