@@ -277,23 +277,9 @@ CUDA_VISIBLE_DEVICES=0 PYTHONPATH=. python inference/cog/inference_partitioned.p
   --checkpoint-dir checkpoints/cog/nudity \
   --output-dir outputs/inference/cog/nudity/single \
   --reference-prompt nudity \
-  --concept-gate-mode competition --concept-gate-policy per_step \
-  --competition-ratio 1.05 --min-relative-score 0.05 \
+  --concept-gate-mode target --min-relative-score 0.05 \
   --generate-originals --save-diagnostics --save-step-masks
 ```
-
-CogVideoX dynamic CFG is enabled by default. Pass `--no-dynamic-cfg` only for a
-constant-CFG ablation. The documented CogVideoX commands match HunyuanVideo by
-using `competition` gating with `per_step` routing. At every denoising step, the
-calibrated target score must pass `--min-relative-score` and reach the configured
-fraction of the strongest competing partition. Cog celebrity uses
-`0.95`, allowing the target to trail the strongest competing identity by at most
-5% to absorb near-tie noise; Cog nudity keeps `1.05`, requiring nudity to lead
-`no_nudity` by 5%. A rejected step has an empty mask, but the decision is
-recomputed at the next step instead of being latched for the entire video. The
-optional `target` mode is less strict because it keeps only the minimum
-target-score check. Use `off` only when diagnosing spatial mask construction
-because it removes calibrated concept-score gating entirely.
 
 ### Batch Video Generation
 
@@ -321,7 +307,7 @@ GPU=0 MAX_PROMPTS=0 \
 
 ERASESAE_COGVIDEOX_MODEL_PATH=pretrained_models/CogVideoX-5b \
 CHECKPOINT_DIR=checkpoints/cog/nudity \
-CONCEPT_GATE_MODE=competition CONCEPT_GATE_POLICY=per_step \
+CONCEPT_GATE_MODE=target \
 GPU=0 MAX_PROMPTS=0 \
   bash inference/cog/run_nudity_validation.sh
 ```
