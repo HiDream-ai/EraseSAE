@@ -2,16 +2,17 @@
 
 # EraseSAE
 
-### Sparse Autoencoder Based Concept Erasure for Text-to-Video Diffusion Models
+*Surgical Concept Erasure in Text-to-Video Diffusion Models via Sparse Autoencoders*
 
 Official PyTorch implementation for **ECCV 2026**
 
 <p>
+  <a href="https://arxiv.org/abs/2609.03629"><img src="https://img.shields.io/badge/arXiv-2609.03629-b31b1b.svg" alt="arXiv paper"></a>
   <a href="https://huggingface.co/wxhustc/EraseSAE"><img src="https://img.shields.io/badge/Models-Hugging_Face-FFD21E?logo=huggingface&logoColor=black" alt="Hugging Face checkpoints"></a>
   <a href="#citation"><img src="https://img.shields.io/badge/ECCV-2026-4C78A8" alt="ECCV 2026"></a>
 </p>
 
-[Overview](#overview) | [Demo](#demo) | [Method](#method) | [Installation](#installation) | [Training](#training) | [Inference](#inference) | [Models](#models-and-checkpoints)
+[Paper](https://arxiv.org/abs/2609.03629) | [Overview](#overview) | [Demo](#demo) | [Method](#method) | [Installation](#installation) | [Training](#training) | [Inference](#inference) | [Models](#models-and-checkpoints)
 
 </div>
 
@@ -325,10 +326,13 @@ Inference writes MP4 files, step-mask PNGs, and optional diagnostics JSON under
 If you find this repository useful, please cite:
 
 ```bibtex
-@inproceedings{wang2026erasesae,
-  title     = {{EraseSAE}: Surgical Concept Erasure in Text-to-Video Diffusion Models via Sparse Autoencoders},
-  author    = {Xinghao Wang and Author Two and Author Three},
-  booktitle = {European Conference on Computer Vision},
-  year      = {2026}
+@misc{wang2026erasesae,
+  title         = {{EraseSAE}: Surgical Concept Erasure in Text-to-Video Diffusion Models via Sparse Autoencoders},
+  author        = {Xinghao Wang and Dong Li and Wei Yu and Yingwei Pan and Tao Gong and Qi Chu and Nenghai Yu and Ting Yao},
+  year          = {2026},
+  eprint        = {2609.03629},
+  archivePrefix = {arXiv},
+  primaryClass  = {cs.CV},
+  url           = {https://arxiv.org/abs/2609.03629}
 }
 ```
